@@ -1,4 +1,3 @@
-import java.security.PublicKey;
 import java.util.Scanner;
 
 public class Main {
@@ -14,92 +13,146 @@ public class Main {
         showTodoList();
         removeTodoList(3);
         System.out.println("AFTER DELETE");
+        showTodoList();
     }
 
     public static void showTodoList() {
-        System.out.println("TODO List");
+        System.out.println("TODO List:");
         for (int i = 0; i < todos.length; i++) {
             String todo = todos[i];
             if (todo != null) {
-                System.out.println((i + 1) + "." + todo);
+                System.out.println((i + 1) + ". " + todo);
             }
         }
     }
 
-    public static void addTodoList(String todo) {
+    public static boolean addTodoList(String todo) {
         resizeArrayIfFull();
         for (int i = 0; i < todos.length; i++) {
-            if ((todos[i] == null)) {
+            if (todos[i] == null) {
                 todos[i] = todo;
-                break;
+                return true;
             }
         }
+        return false;
     }
 
     public static void resizeArrayIfFull() {
-        // cek whether todos is full
-        Boolean isFull = true;
-        // isFull = isArrayFull(isFull);
-
-        // if Full, resize current array to two times bigger
-        if (isFull) {
-            //resizeArrayToTwoTimesBigger();
+        if (isArrayFull()) {
+            resizeArrayToTwoTimesBigger();
         }
     }
 
-    public static Boolean isArray() {
-        for (int i = 0; i < todos.length; i++) {
-            if (todos[i] == null) {
+    public static boolean isArrayFull() {
+        for (String todo : todos) {
+            if (todo == null) {
                 return false;
             }
         }
         return true;
     }
 
-    public static void resizerArrayToTwoTimesBigger() {
+    public static void resizeArrayToTwoTimesBigger() {
         String[] temp = todos;
         todos = new String[todos.length * 2];
-        for (int i = 0; i < temp.length; i++) {
-            todos[i] = temp[i];
-        }
+        System.arraycopy(temp, 0, todos, 0, temp.length);
     }
 
-    public static boolean removeTodoList(Integer number) {
-        // TODO: add validation
-
-        for (int i = number - 1; i < todos.length; i++) {
-            if (i == (todos.length - 1)) {
-                todos[i] = null;
-            } else {
-                // replace with the elemen on the right
-                todos[i] = todos[i + 1];
-            }
+    public static boolean removeTodoList(int number) {
+        if (isSelectedTodoNotValid(number)) {
+            return false;
         }
+        for (int i = number - 1; i < todos.length - 1; i++) {
+            todos[i] = todos[i + 1];
+        }
+        todos[todos.length - 1] = null;
         return true;
     }
 
-    private static boolean isSelectedTodoNotValid(Integer number) {
-        // cek if the number is zero or less than zero
-        if (number <= 0){
-            return true;
-        }
-
-        // check if the number is greater then the todos size/length
-        if (number - 1 > todos.length - 1){
-            return true;
-        }
-
-        //check whether the elemen is already null
-        if (todos[number - 1] == null) {
-        }
-        return false;
+    private static boolean isSelectedTodoNotValid(int number) {
+        return number <= 0 || number > todos.length || todos[number - 1] == null;
     }
 
-    public static boolean editTodoList(Integer number, String newTodo){
-        if (isSelectedTodoNotValid(number)){
+    public static boolean editTodoList(int number, String newTodo) {
+        if (isSelectedTodoNotValid(number)) {
             return false;
         }
         todos[number - 1] = newTodo;
         return true;
+    }
+
+    public static String input(String info) {
+        System.out.print(info + ": ");
+        return scanner.nextLine();
+    }
+
+    public static void showMainMenu() {
+        boolean isRunning = true;
+        while (isRunning) {
+            showTodoList();
+            System.out.println("Menu:");
+            System.out.println("1. Tambah");
+            System.out.println("2. Hapus");
+            System.out.println("3. Edit");
+            System.out.println("4. Keluar");
+            String selectMenu = input("Pilih");
+            switch (selectMenu) {
+                case "1":
+                    showMenuAddTodoList();
+                    break;
+                case "2":
+                    showMenuRemoveTodoList();
+                    break;
+                case "3":
+                    showMenuEditTodoList();
+                    break;
+                case "4":
+                    isRunning = false;
+                    break;
+                default:
+                    System.out.println("Pilihan tidak valid.");
+            }
+        }
+    }
+
+    public static void showMenuRemoveTodoList() {
+        System.out.println("Menghapus Todo List");
+        String number = input("Nomor yang dihapus (x jika batal)");
+        if (number.equals("x")) {
+            return;
+        } else {
+            boolean success = removeTodoList(Integer.parseInt(number));
+            if (!success) {
+                System.out.println("Gagal menghapus todo list nomor: " + number);
+            }
+        }
+    }
+
+    public static void showMenuAddTodoList() {
+        System.out.println("Menambah Todo List");
+        String todo = input("Masukkan todo baru (x jika batal)");
+        if (todo.equals("x")) {
+            return;
+        } else {
+            addTodoList(todo);
+        }
+    }
+
+    public static void showMenuEditTodoList() {
+        System.out.println("Mengedit Todo List");
+        String selectedTodo = input("Nomor todo yang akan diubah (x jika batal)");
+        if (selectedTodo.equals("x")) {
+            return;
+        }
+        String newTodo = input("Masukkan todo baru (x jika batal)");
+        if (newTodo.equals("x")) {
+            return;
+        }
+        boolean success = editTodoList(Integer.parseInt(selectedTodo), newTodo);
+        if (success) {
+            System.out.println("Berhasil mengedit todo.");
+        } else {
+            System.out.println("Gagal mengedit todo.");
+        }
     }
 }
